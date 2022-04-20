@@ -1,0 +1,22 @@
+{
+  "name": "video-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "agora-access-token": "^2.0.4",
+    "body-parser": "^1.20.0",
+    "config": "^3.3.7",
+    "express": "^4.17.3",
+    "express-ws": "^5.0.2",
+    "install": "^0.13.0",
+    "nanoid": "^3.3.2",
+    "socket.io": "^4.4.1",
+    "uuid": "^8.3.2"
+  }
+}
