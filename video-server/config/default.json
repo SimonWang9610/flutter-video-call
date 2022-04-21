@@ -1,0 +1,10 @@
+{
+    "http": {
+        "port": 8888
+    },
+    "agora": {
+        "appID": "98ecb2921e0d4b23afe210d5c4f672eb",
+        "appCert": "4176daaf21f144bfb17cd96e91db8e9e",
+        "expiry": 3600
+    }
+}
