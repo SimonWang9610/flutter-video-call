@@ -63,6 +63,8 @@ abstract class PeerBase {
     controller.close();
   }
 
+  Future<void> reconnect(String peerId);
+
   void disconnect() => close();
 
   void signaling(String willSignalEvent, dynamic data);

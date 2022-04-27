@@ -8,7 +8,7 @@ typedef RTCCallHandler = void Function(Map<String, dynamic>);
 
 class ClientIO {
   static final _instance = ClientIO._();
-  static const _baseUri = 'http://192.168.2.136:8888/';
+  static const _baseUri = 'http://149.248.51.194:8888/';
 
   ClientIO._();
 
@@ -57,7 +57,6 @@ class ClientIO {
   }
 
   void emitRTCEvent(String event, Map<String, dynamic> data) {
-    print('emit rtc event: $event');
     _rtc!.emit(event, data);
   }
 

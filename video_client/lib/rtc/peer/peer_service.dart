@@ -31,11 +31,20 @@ class PeerService extends PeerBase with PeerHelper {
 
   @override
   Map<String, dynamic> get configuration => {
-        'iceServer': [
+        // open STUN/TURN server: https://openrelayproject.org/
+        'iceServers': [
+          // {
+          //   'url': 'stun:stun.l.google.com:19302',
+          // },
+          {'url': 'stun:149.248.51.194:3478'},
+
           {
-            'url': 'stun:stun.l.google.com:19302',
+            'url': 'turn:149.248.51.194:3478',
+            'username': 'simonwang',
+            'credential': 'simonwang',
           }
         ],
+        //'iceTransportPolicy': 'all',
         'sdpSemantics': 'unified-plan'
       };
 
@@ -123,7 +132,7 @@ class PeerService extends PeerBase with PeerHelper {
     }
 
     // create remote vide render
-    await createPeerVideoRender(peerId);
+    // await createPeerVideoRender(peerId);
 
     // must set remote SDP if we will signal 'room:answer'
     // otherwise, we cannot createAnswer() for the connection
@@ -155,11 +164,11 @@ class PeerService extends PeerBase with PeerHelper {
 
     // track the remote stream from the remote peer
     if (enableDuplex || willSignalEvent == 'room:answer') {
-      peerConn.onTrack = (event) => onTrack(peerId, event);
-      peerConn.onAddTrack =
+      peerConn.onTrack ??= (event) => onTrack(peerId, event);
+      peerConn.onAddTrack ??=
           (stream, track) => onAddTrack(peerId, stream, track);
 
-      peerConn.onRemoveTrack =
+      peerConn.onRemoveTrack ??=
           (stream, track) => onRemoveTrack(peerId, stream, track);
     }
 
@@ -170,7 +179,7 @@ class PeerService extends PeerBase with PeerHelper {
     await peerConn.setLocalDescription(localSdp);
 
     if (kDebugMode) {
-      print('local SDP: ${localSdp.toMap()}');
+      // print('local SDP: ${localSdp.toMap()}');
     }
 
     rtcService.emitRTCEvent(
@@ -189,21 +198,34 @@ class PeerService extends PeerBase with PeerHelper {
 
     final peerConnection = await createPeerConnection(configuration);
 
+    final peerRender = RTCVideoRenderer();
+
+    await peerRender.initialize();
+
     peerConnections[peerId] = peerConnection;
+    remoteRenders[peerId] = peerRender;
 
-    peerConnection.onSignalingState = onHandshakeState<RTCSignalingState>;
-    peerConnection.onIceGatheringState = onHandshakeState<RTCIceGatheringState>;
+    peerConnection.onSignalingState ??= onHandshakeState<RTCSignalingState>;
+    peerConnection.onIceGatheringState ??=
+        onHandshakeState<RTCIceGatheringState>;
 
-    peerConnection.onIceConnectionState =
-        onHandshakeState<RTCIceConnectionState>;
+    peerConnection.onIceConnectionState ??=
+        (state) => onIceConnectionState(peerId, state);
 
-    peerConnection.onConnectionState =
+    peerConnection.onConnectionState ??=
         (state) => onPeerConnectionState(peerId, state);
 
-    peerConnection.onIceCandidate =
+    peerConnection.onIceCandidate ??=
         (candidate) => onIceCandidate(peerId, candidate);
 
     peerConnection.onRenegotiationNeeded = () => onRenegotiationNeeded(peerId);
+  }
+
+  @override
+  Future<void> reconnect(String peerId) async {
+    if (isOffer) {
+      await startTrackingMedia(peerId, 'room:offer');
+    }
   }
 
   @override

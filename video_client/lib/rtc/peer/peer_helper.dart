@@ -5,10 +5,22 @@ import 'package:video_client/rtc/client_io.dart';
 
 mixin PeerHelper on PeerBase {
   void onTrack(String peerId, RTCTrackEvent event) {
+    if (kDebugMode) {
+      for (final stream in event.streams) {
+        print('onTrack -> tag: ${stream.ownerTag}');
+      }
+    }
+
     remoteRenders[peerId]?.srcObject = event.streams[0];
   }
 
   void onAddTrack(String peerId, MediaStream stream, MediaStreamTrack track) {
+    if (kDebugMode) {
+      print(
+          'onAddTrack -> $peerId: label: ${track.label}, kind: ${track.kind}');
+      print('`onAddTrack -> tag: ${stream.ownerTag}');
+    }
+
     remoteRenders[peerId]?.srcObject = stream;
   }
 
@@ -29,6 +41,10 @@ mixin PeerHelper on PeerBase {
     final peerId = peerData['userid'];
     final candidateMap = peerData['candidate'] as Map<String, dynamic>;
 
+    if (kDebugMode) {
+      print('onAddIceCandidate: $candidateMap');
+    }
+
     peerConnections[peerId]?.addCandidate(
       candidateMap.asIceCandidate(),
     );
@@ -37,6 +53,21 @@ mixin PeerHelper on PeerBase {
   void onHandshakeState<T>(T state) {
     if (kDebugMode) {
       print(state);
+    }
+  }
+
+  void onIceConnectionState(String peerId, RTCIceConnectionState state) {
+    if (kDebugMode) {
+      print('$peerId : $state');
+    }
+
+    switch (state) {
+      case RTCIceConnectionState.RTCIceConnectionStateDisconnected:
+      case RTCIceConnectionState.RTCIceConnectionStateFailed:
+        peerConnections[peerId]?.restartIce();
+        break;
+      default:
+        return;
     }
   }
 
@@ -50,6 +81,7 @@ mixin PeerHelper on PeerBase {
 
   void onRenegotiationNeeded(String peerId) {
     // TODO: handle re-negotitation and createAnswer()
+    print('*********on negotiation**********');
   }
 
   void onPeerLeave(dynamic data) {

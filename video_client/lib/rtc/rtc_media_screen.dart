@@ -100,7 +100,7 @@ class _RTCVideoState extends State<RTCVideo> {
           if (_service.type == 'video')
             Positioned(
               right: 25,
-              top: 40,
+              bottom: 40,
               child: RTCView(
                 type: widget.type,
                 render: _service.localRender!,
