@@ -145,27 +145,23 @@ class PeerMediaService extends PeerBase with PeerHelper {
           );
     }
 
-    peerConn.onTrack ??= (event) => onTrack(peerId, event);
-    peerConn.onAddTrack ??=
-        (stream, track) => onAddTrack(peerId, stream, track);
+    if (!sendOnly) {
+      peerConn.onTrack ??= (event) => onTrack(peerId, event);
+      peerConn.onAddTrack ??=
+          (stream, track) => onAddTrack(peerId, stream, track);
 
-    peerConn.onRemoveTrack ??=
-        (stream, track) => onRemoveTrack(peerId, stream, track);
+      peerConn.onRemoveTrack ??=
+          (stream, track) => onRemoveTrack(peerId, stream, track);
+    }
 
-    // if (candidatesQueue.isNotEmpty) {
-    //   for (final candidate in candidatesQueue) {
-    //     rtcService.emitRTCEvent('room:candidate', {
-    //       'room': room,
-    //       'candidate': candidate.toMap(),
-    //       'peerId': peerId,
-    //     });
-    //   }
-    // }
-
-    // TODO: apply [recveOnlyConstraints]
     final sdpOffer = await peerConn
         .createOffer(sendOnly ? sendOnlyConstraints : offerSdpConstraints);
+
+    setDirection(sdpOffer, sendOnly ? 'sendonly' : 'recvonly');
     await peerConn.setLocalDescription(sdpOffer);
+
+    // print('OFFER to: $peerId');
+    // print('----------------${sdpOffer.toMap()}');
 
     return sdpOffer;
   }
@@ -193,8 +189,13 @@ class PeerMediaService extends PeerBase with PeerHelper {
     peerConnection.onIceConnectionState =
         (state) => onIceConnectionState(peerId, state);
 
-    peerConnection.onConnectionState =
-        (state) => onPeerConnectionState(peerId, state);
+    peerConnection.onConnectionState = (state) {
+      // if (state == RTCPeerConnectionState.RTCPeerConnectionStateConnected) {
+      //   getConnInfo(peerId);
+      // }
+
+      onPeerConnectionState(peerId, state);
+    };
 
     peerConnection.onIceCandidate =
         (candidate) => onIceCandidate(peerId, candidate);
@@ -208,9 +209,6 @@ class PeerMediaService extends PeerBase with PeerHelper {
     bool sendOnly = false,
   }) async {
     final sdpOffer = await generateOffer(peerId, sendOnly);
-
-    print('OFFER to: $peerId');
-    print('----------------$sdpOffer');
 
     rtcService.emitRTCEvent('room:media:request', {
       'room': room,
@@ -294,6 +292,38 @@ class PeerMediaService extends PeerBase with PeerHelper {
       await remoteRenders[peerId]?.dispose();
       peerConnections.remove(peerId);
       remoteRenders.remove(peerId);
+    }
+  }
+
+  Future<void> addTransceiver(
+    RTCPeerConnection connection, [
+    bool sendOnly = false,
+  ]) async {
+    await connection.addTransceiver(
+      track: localStream!.getVideoTracks()[0],
+      kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
+      init: RTCRtpTransceiverInit(
+        direction: TransceiverDirection.SendOnly,
+      ),
+    );
+
+    await connection.addTransceiver(
+      track: localStream!.getAudioTracks()[0],
+      kind: RTCRtpMediaType.RTCRtpMediaTypeAudio,
+      init: RTCRtpTransceiverInit(
+        // direction: sendOnly
+        //     ? TransceiverDirection.SendOnly
+        //     : TransceiverDirection.RecvOnly,
+        direction: TransceiverDirection.SendOnly,
+      ),
+    );
+  }
+
+  void setDirection(RTCSessionDescription offerSdp, String direction) {
+    final sdp = offerSdp.sdp;
+
+    if (sdp != null) {
+      offerSdp.sdp = sdp.replaceAll('sendrecv', direction);
     }
   }
 }

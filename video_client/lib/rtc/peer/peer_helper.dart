@@ -30,9 +30,9 @@ mixin PeerHelper on PeerBase {
   }
 
   void onIceCandidate(String peerId, RTCIceCandidate candidate) {
-    if (kDebugMode) {
-      print('gathered candidate: ${candidate.candidate}');
-    }
+    // if (kDebugMode) {
+    //   print('gathered candidate: ${candidate.candidate}');
+    // }
 
     // candidatesQueue.add(candidate);
 
