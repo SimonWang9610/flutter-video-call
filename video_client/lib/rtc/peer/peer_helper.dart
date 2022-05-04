@@ -89,7 +89,8 @@ mixin PeerHelper on PeerBase {
   void onRenegotiationNeeded(String peerId) {
     // TODO: handle re-negotitation and createAnswer()
     print('*********on negotiation**********');
-    peerConnections[peerId]?.restartIce();
+    // peerConnections[peerId]?.restartIce();
+    // TODO: should re-generateOffer();
   }
 
   void onPeerLeave(dynamic data) {
