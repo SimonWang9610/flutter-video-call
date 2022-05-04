@@ -6,5 +6,8 @@
         "appID": "98ecb2921e0d4b23afe210d5c4f672eb",
         "appCert": "4176daaf21f144bfb17cd96e91db8e9e",
         "expiry": 3600
+    },
+    "kurento": {
+        "url": "ws://137.220.53.98:8888/kurento"
     }
 }

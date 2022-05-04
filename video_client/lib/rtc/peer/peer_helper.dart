@@ -7,7 +7,7 @@ mixin PeerHelper on PeerBase {
   void onTrack(String peerId, RTCTrackEvent event) {
     if (kDebugMode) {
       for (final stream in event.streams) {
-        print('onTrack -> tag: ${stream.ownerTag}');
+        print('onTrack from $peerId -> tag: ${stream.ownerTag}');
       }
     }
 
@@ -30,9 +30,16 @@ mixin PeerHelper on PeerBase {
   }
 
   void onIceCandidate(String peerId, RTCIceCandidate candidate) {
+    if (kDebugMode) {
+      print('gathered candidate: ${candidate.candidate}');
+    }
+
+    // candidatesQueue.add(candidate);
+
     rtcService.emitRTCEvent('room:candidate', {
       'room': room,
       'candidate': candidate.toMap(),
+      'peerId': peerId,
     });
   }
 
@@ -41,9 +48,9 @@ mixin PeerHelper on PeerBase {
     final peerId = peerData['userid'];
     final candidateMap = peerData['candidate'] as Map<String, dynamic>;
 
-    if (kDebugMode) {
-      print('onAddIceCandidate: $candidateMap');
-    }
+    // if (kDebugMode) {
+    //   print('onAddIceCandidate: $candidateMap');
+    // }
 
     peerConnections[peerId]?.addCandidate(
       candidateMap.asIceCandidate(),
@@ -82,6 +89,7 @@ mixin PeerHelper on PeerBase {
   void onRenegotiationNeeded(String peerId) {
     // TODO: handle re-negotitation and createAnswer()
     print('*********on negotiation**********');
+    peerConnections[peerId]?.restartIce();
   }
 
   void onPeerLeave(dynamic data) {

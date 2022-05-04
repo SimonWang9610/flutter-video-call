@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:video_client/rtc/client_io.dart';
 import 'package:video_client/rtc/peer/peer_event.dart';
+import 'package:video_client/utils/sotre_util.dart';
 
 abstract class PeerBase {
   Map<String, dynamic> get mediaConstraints;
@@ -16,6 +17,7 @@ abstract class PeerBase {
 
   final Map<String, RTCPeerConnection> peerConnections = {};
   final Map<String, RTCVideoRenderer> remoteRenders = {};
+  final List<RTCIceCandidate> candidatesQueue = [];
 
   final ClientIO rtcService = ClientIO();
   final StreamController<PeerEvent> controller = StreamController();
@@ -63,11 +65,15 @@ abstract class PeerBase {
     controller.close();
   }
 
-  Future<void> reconnect(String peerId);
+  Future<void> reconnect(String peerId) {
+    throw UnimplementedError('no implemented: reconnect');
+  }
 
   void disconnect() => close();
 
-  void signaling(String willSignalEvent, dynamic data);
+  void signaling(String willSignalEvent, dynamic data) {
+    throw UnimplementedError('no implement signaling');
+  }
 
   void toggleMedia(String name) {
     final tracks = name == 'audio'
@@ -115,6 +121,7 @@ abstract class PeerBase {
   void hangUp() {
     rtcService.emitRTCEvent('room:leave', {
       'room': room,
+      'userid': LocalStorage.read('userid'),
     });
     rtcService.leaveRoom();
   }

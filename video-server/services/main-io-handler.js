@@ -53,3 +53,7 @@ module.exports.isOnline = (userid) => {
 
     return clients.has(userid);
 }
+
+module.exports.getSocket = (userid) => {
+    return clients.get(userid);
+}

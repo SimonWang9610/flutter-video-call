@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:video_client/rtc/peer/peer_event.dart';
 import 'package:video_client/rtc/peer/peer_service.dart';
+import 'package:video_client/rtc/peer/peer_media_service.dart';
 import 'package:video_client/rtc/rtc_view.dart';
 
 import 'client_io.dart';
@@ -32,7 +33,7 @@ class _RTCVideoState extends State<RTCVideo> {
   final String userid = LocalStorage.read('userid');
   final String username = LocalStorage.read('username');
 
-  late final PeerService _service;
+  late final PeerMediaService _service;
   late final StreamSubscription<PeerEvent> _sub;
 
   bool _canPreview = false;
@@ -54,7 +55,7 @@ class _RTCVideoState extends State<RTCVideo> {
       room: widget.room,
     );
 
-    _service = PeerService(
+    _service = PeerMediaService(
       config: config,
       type: widget.type,
     );
