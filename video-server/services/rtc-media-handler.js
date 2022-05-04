@@ -16,7 +16,7 @@ module.exports.joinRoom = async (socket, data) => {
     //     optional: caller,
     // }
 
-    console.log(`someone joins room, ${JSON.stringify(data)}`);
+    // console.log(`someone joins room, ${JSON.stringify(data)}`);
 
     try {
         if (!kurentoClient) {
@@ -113,10 +113,10 @@ module.exports.leaveRoom = (data) => {
         let room = rooms[data.room];
         room.leave(data.userid);
 
-        // if (room.peers.length <= 1) {
-        //     room.close();
-        //     delete rooms[data.room]
-        // }
+        if (room.peers.length <= 1) {
+            room.close();
+            delete rooms[data.room]
+        }
     }
 }
 

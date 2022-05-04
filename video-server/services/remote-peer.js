@@ -102,20 +102,20 @@ class RemotePeer {
 
         if (!incoming) {
             incoming = await this.pipeline.create('WebRtcEndpoint');
-            incomingRecorder = await this.pipeline.create('RecorderEndpoint', {
-                uri: 'file:///tmp/video/incoming/' + this.peerId + '.mp4',
-                mediaProfile: 'MP4',
-                stopOnEndOfStream: true
-            });
+            // incomingRecorder = await this.pipeline.create('RecorderEndpoint', {
+            //     uri: 'file:///tmp/video/incoming/' + this.peerId + '.mp4',
+            //     mediaProfile: 'MP4',
+            //     stopOnEndOfStream: true
+            // });
 
             this.incomingEndpoints[remotePeer.peerId] = incoming;
-            this.incomingRecorders[remotePeer.peerId] = incomingRecorder;
+            //this.incomingRecorders[remotePeer.peerId] = incomingRecorder;
             this.flushCandidates(remotePeer.peerId);
         }
         console.log(`${this.peerId} request incoming endpoint from ${remotePeer.peerId}`);
         // enable incoming endpoint to receive video from [userid]
         await remotePeer.endpoint.connect(incoming);
-        await incoming.connect(incomingRecorder);
+        //await incoming.connect(incomingRecorder);
 
         console.log(`${this.peerId} of incoming endpoint connected to remote media source`);
         return incoming;
@@ -142,7 +142,7 @@ class RemotePeer {
             }
         });
 
-        this.startRecordingIncoming(remotePeer.peerId);
+        //this.startRecordingIncoming(remotePeer.peerId);
     }
 
     gatherCandidates() {
